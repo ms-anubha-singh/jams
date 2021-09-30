@@ -1,10 +1,30 @@
 import fire from '../../config/firebaseAdminConfig';
+import ensureAdmin from 'utils/admin-auth-middleware';
+import ObjectsToCsv from 'objects-to-csv';
 
 async function handler(req, res) {
-  const jamId = 'hZLVrK2lhig19cbLuMBx';
+  const {
+    query: { jamId, contentType },
+    method,
+  } = req;
+
+  if (method !== 'GET') {
+    res.setHeader('Allow', ['GET']);
+    res.status(405).end(`Method ${method} Not Allowed`);
+    return;
+  }
 
   try {
+    let token;
+    try {
+      token = await ensureAdmin(req, res);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: 'Sorry, permission denied' });
+    }
     const db = fire.firestore();
+
     const jamsRef = db.collection('jams');
     const statementsRef = db
       .collection('jams')
@@ -18,25 +38,41 @@ async function handler(req, res) {
         const getStatment = document.data();
         statements.push(getStatment);
       });
-      return statements[0];
+      return statements;
     });
 
-    // .where('adminId', '==', 'auth0|614c41b3de45d300692bc589')
-    const jam = await jamsRef.get().then((querySnapshot) => {
-      let jar = [];
-      querySnapshot.forEach((document) => {
-        const jam = document.data();
-        jam.id = document.id;
-        jar.push(jam);
+    const jam = await jamsRef
+      .doc(jamId)
+      .get()
+      .then((doc) => {
+        const data = doc.data();
+        if (data.adminId != token.sub) {
+          throw new Error('Permission denied');
+        }
+        return data;
       });
-      return jar[0];
-    });
 
-    return res
-      .status(200)
-      .json({ jam: jam, statement: allStatements });
+    if (contentType === 'text/csv') {
+      const csv = await new ObjectsToCsv(
+        Object.values({
+          jam: jam,
+          statement: allStatements,
+        }),
+      );
+      res.setHeader('Content-Type', contentType);
+      res.status(200);
+      res.send(await csv.toString());
+    } else {
+      return res
+        .status(200)
+        .json({ jam: jam, statement: allStatements });
+    }
+
+    return;
   } catch {
-    return res.status(500).json({ error: 'Well, that did not work' });
+    return res
+      .status(500)
+      .json({ error: 'Sorry, something went wrong' });
   }
 }
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 function Information() {
   const [jamInfo, setJamInfo] = useState();
   const jamId = 'hZLVrK2lhig19cbLuMBx';
+  // contentType can be either 'application/json' or 'text/csv'
   const contentType = 'text/csv';
 
   useEffect(() => {

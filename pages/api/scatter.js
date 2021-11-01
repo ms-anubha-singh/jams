@@ -2,6 +2,8 @@ import ensureAdmin from 'utils/admin-auth-middleware.js';
 import fire from '../../config/firebaseAdminConfig';
 
 async function handler(req, res) {
+  // For now: jamId is hardcoded.
+  // In future allow user to select a Jam.
   const jamId = 'AdaCMpU5JPYuSs8k9Yl3';
 
   const { method } = req;
@@ -25,7 +27,6 @@ async function handler(req, res) {
 
       query.forEach((document) => {
         const getStatment = document.data();
-        console.log(getStatment);
         statements.push(getStatment);
       });
       return statements;

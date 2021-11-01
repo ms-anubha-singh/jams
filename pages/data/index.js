@@ -17,13 +17,11 @@ function DataPoints() {
 
     const loadScore = (agrees, disagrees) => {
       let score = (agrees - disagrees) / (agrees + disagrees);
-      console.log(`score: ${score}`);
       return score;
     };
 
     const response = await fetch('/api/scatter');
     const data = await response.json();
-    console.log(data.statement);
     setStatements(data.statement);
 
     data.statement.map(

@@ -8,7 +8,6 @@ import {
 } from '@chakra-ui/react';
 
 import { useState, useEffect } from 'react';
-import OverviewJamCard from '@/components/OverviewJamCard';
 import AdminHeader from '@/components/AdminHeader';
 import Layout from '@/components/Layout';
 import LoadingState from '@/components/LoadingState';
@@ -76,15 +75,6 @@ function Moderator() {
     return showTitles;
   };
 
-  // const [matchedJams, setMatchedJams] = useState();
-  // const [otherJams, setOthersJams] = useState();
-
-  // useEffect(() => {
-  //   const [matchedJams, otherJams] = loadFilteredJams();
-  //   setMatchedJams(matchedJams);// only running this when either jams or searchResults change
-  //   setOthersJams(otherJams);
-  // }, [jams, searchResults])
-
   return (
     <>
       <AdminHeader />
@@ -125,20 +115,6 @@ function Moderator() {
           ) : (
             ''
           )}
-
-          {/* <GridItem>
-            <Text>Filtered Results!</Text>
-            {title && searchResults
-              ? loadFilteredJams().map((item) => item.name)
-              : 'no results'}
-          </GridItem> */}
-
-          {/* {jams && jams.length
-            ? jams.map((jam, i) => {
-                return <ResultsCard jam={jam} key={i} />;
-              })
-            : ''} */}
-
           {title && searchResults ? (
             <ShowMatchingJamsLists
               jams={jams}
@@ -150,30 +126,6 @@ function Moderator() {
           ) : (
             ''
           )}
-
-          {/* {jams && jams.length
-            ? jams.map((jam, i) => {
-                return (
-                  <>
-                    <GridItem
-                      key={i}
-                      colSpan={{ sm: 1, md: 2 }}
-                      colStart={{ sm: 1, md: 3 }}
-                    >
-                      <OverviewJamCard
-                        jamUrl={jam.urlPath}
-                        isOpen={jam.isOpen}
-                        jamName={jam.name}
-                        openFor={timeSince(jam.createdAt._seconds)}
-                        createdAt={convertDate(
-                          jam.createdAt._seconds,
-                        )}
-                      />
-                    </GridItem>
-                  </>
-                );
-              })
-            : ''} */}
         </Layout>
       </HStack>
     </>

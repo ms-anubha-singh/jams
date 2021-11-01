@@ -2,8 +2,6 @@ import ensureAdmin from 'utils/admin-auth-middleware';
 import fire from '../../config/firebaseAdminConfig';
 
 async function handler(req, res) {
-  // const searchTerm = req.searchTerm; //'Folk';
-
   const {
     query: { searchTerm },
     method,
@@ -17,7 +15,6 @@ async function handler(req, res) {
       let titles = [];
 
       queryDocSnapshot.forEach((document) => {
-        // console.log(document.data());
         const jamData = document.data();
         titles.push(jamData.name);
       });
@@ -29,7 +26,6 @@ async function handler(req, res) {
     const foundTitle = titles.filter((qText) =>
       qText.toLowerCase().includes(searchTerm.toLowerCase()),
     );
-    console.log(foundTitle);
 
     return res.status(200).json({ titles: foundTitle });
   } catch (error) {

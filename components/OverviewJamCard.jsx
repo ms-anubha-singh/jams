@@ -10,7 +10,6 @@ import {
   Link,
 } from '@chakra-ui/react';
 
-// const bgColour = 'white';
 const overviewCard = ({
   bgColour,
   isOpen,
@@ -19,9 +18,6 @@ const overviewCard = ({
   openFor,
   jamUrl,
 }) => {
-  // TODO Sort out the Background Colour
-  // const bgColour = '#FFFFBF';
-
   return (
     <Box
       bg={bgColour ? bgColour : ''}

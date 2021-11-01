@@ -12,7 +12,6 @@ import AdminHeader from '@/components/AdminHeader';
 import Layout from '@/components/Layout';
 import LoadingState from '@/components/LoadingState';
 import router from 'next/router';
-import { convertDate, timeSince } from '../../utils/date';
 import EmptyState from '@/components/EmptyState';
 import ResultsCard from '@/components/ResultsCard';
 
@@ -21,16 +20,12 @@ function Moderator() {
   const [searchText, setSearchText] = useState();
   const [searchResults, setSearchResults] = useState();
   const [title, setTitle] = useState([]);
-  const [searchResultsJam, setSearchResultsJam] = useState();
-  const [otherJamsResults, setOtherJamsResults] = useState([]);
 
   useEffect(() => {
     loadJams();
   }, []);
 
-  // Call the API for a list of Jams
   const loadJams = async () => {
-    let updateTitles = [];
     await fetch('/api/jamming')
       .then((response) => response.json())
       .then((jam) => {
@@ -42,8 +37,6 @@ function Moderator() {
   };
 
   const handleSearch = async () => {
-    console.log(`SearchText: ${searchText}`);
-
     await fetch(
       `/api/search-title?searchTerm=${encodeURIComponent(
         searchText,
@@ -51,7 +44,6 @@ function Moderator() {
     )
       .then((response) => response.json())
       .then((data) => {
-        // console.log(data);
         setSearchResults(data.titles);
       });
   };
@@ -59,20 +51,6 @@ function Moderator() {
   const handleSearchText = (event) => {
     let searchText = event.target.value;
     setSearchText(searchText);
-  };
-
-  const loadSearchResults = () => {
-    console.log('in load search');
-
-    let showTitles = [];
-
-    searchResults.map((item) => {
-      let addName = title.filter((name) => name === item);
-      console.log(`addName: ${addName}`);
-      showTitles = [...showTitles, addName];
-    });
-
-    return showTitles;
   };
 
   return (
@@ -149,7 +127,7 @@ function ShowMatchingJamsLists({ jams, searchResults, searchText }) {
     return [filteredJams, otherJams];
   };
 
-  const [matchedJams, otherJams] = loadFilteredJams(); // running this every time the component re-renders
+  const [matchedJams, otherJams] = loadFilteredJams();
 
   return (
     <>

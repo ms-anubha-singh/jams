@@ -5,8 +5,6 @@ function SearchText() {
   const [searchText, setSearchText] = useState();
 
   const handleSearch = async () => {
-    console.log(`SearchText in search-text: ${searchText}`);
-
     await fetch(
       `/api/search-title?searchTerm=${encodeURIComponent(
         searchText,

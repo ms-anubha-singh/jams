@@ -3,7 +3,6 @@ import { GridItem } from '@chakra-ui/react';
 import { convertDate, timeSince } from '../utils/date';
 
 function ResultsCard({ jam, key, bgColour }) {
-  console.log('inside ResultCard');
   const i = key;
   return (
     <GridItem

@@ -30,4 +30,12 @@ describe('App', () => {
 
     expect(heading).toBeInTheDocument();
   });
+
+  it('adding a test jest', () => {
+    const fakeData = {
+      name: 'fake name',
+    };
+
+    expect(fakeData).toEqual({ name: 'fake name' });
+  });
 });

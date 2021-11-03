@@ -1,6 +1,6 @@
 # Jams
 
-Checking if folked add secrets.
+Checking if I can commit to main.
 
 Jams is a collaborative surey tool that gauges consensus around a series of sentences to which the participants can themselves contribute as well.
 It is being built as a Red Badger bench open source project.

@@ -33,9 +33,9 @@ describe('App', () => {
 
   it('adding a test jest', () => {
     const fakeData = {
-      name: 'fake',
+      name: 'fake name',
     };
 
-    expect(fakeData).toEqual({ name: 'fake' });
+    expect(fakeData).toEqual({ name: 'fake name' });
   });
 });

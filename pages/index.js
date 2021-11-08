@@ -23,7 +23,7 @@ function HomeHeader({ session }) {
           {!session ? (
             <>
               <Button variant="outline" onClick={() => signIn()}>
-                Sign in
+                Sign in, Please.
               </Button>
             </>
           ) : (

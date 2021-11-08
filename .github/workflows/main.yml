@@ -1,0 +1,73 @@
+name: Production build+deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Cache node modules and next folder
+      - name: 📬 Caching
+        uses: actions/cache@v2
+        with:
+          path: |
+            **/node_modules
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+
+      - name: Create .env file
+        uses: SpicyPizza/create-envfile@v1
+        with:
+          envkey_FIREBASE_DB_URL: ${{ secrets.FIREBASE_DB_URL }}
+          envkey_AUTH0_ISSUER_BASE_URL: ${{ secrets.AUTH0_ISSUER_BASE_URL }}
+          envkey_AUTH0_CLIENT_ID: ${{ secrets.AUTH0_CLIENT_ID }}
+          envkey_AUTH0_CLIENT_SECRET: ${{ secrets.AUTH0_CLIENT_SECRET }}
+          envkey_NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
+          file_name: '.env'
+
+      - name: Add Firebase secret
+        run: |
+          mkdir secrets
+          echo $FIREBASE_ADMIN_CREDENTIALS | base64 -d > secrets/firebase_admin_credentials.json
+        env:
+          FIREBASE_ADMIN_CREDENTIALS: ${{ secrets.FIREBASE_ADMIN_CREDENTIALS }}
+
+      - name: 🧰 Install dependencies
+        run: |
+          npm install -g yarn
+          yarn install
+
+      # - name: 🧹 Run lint
+      #   run: npm run lint
+
+      - name: 🐛 Run tests
+        run: yarn test
+
+      - name: 🛠   Build project
+        id: build-netlify
+        run: |
+          netlify build
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+      - name: 🚀 Production deploy to Netlify
+        id: deploy-netlify
+        run: |
+          netlify deploy -m 'Production deploy - ${{ github.sha }}' --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+

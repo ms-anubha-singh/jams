@@ -37,7 +37,7 @@ function HomeHeader({ session }) {
                 {session.user.email}
               </Text>
               <Button variant="outline" onClick={() => signOut()}>
-                Sign out
+                Sign out, Please
               </Button>
             </>
           )}
@@ -72,7 +72,7 @@ export default function Home() {
               )}
               {!session && (
                 <Text color="gray.600">
-                  Please sign in to get started.
+                  Please sign in to get started. Right now!
                 </Text>
               )}
             </Box>

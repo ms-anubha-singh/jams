@@ -2,6 +2,8 @@
 
 I can only commit readme edits.
 
+I've created a new branch.
+
 Jams is a collaborative surey tool that gauges consensus around a series of sentences to which the participants can themselves contribute as well.
 It is being built as a Red Badger bench open source project.
 

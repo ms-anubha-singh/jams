@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   Badge,
   Box,
@@ -10,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 
 const overviewCard = ({
+  bgColour,
   isOpen,
   jamName,
   createdAt,
@@ -18,7 +20,7 @@ const overviewCard = ({
 }) => {
   return (
     <Box
-      bg="white"
+      bg={bgColour ? bgColour : ''}
       rounded={'md'}
       p={5}
       overflow={'hidden'}

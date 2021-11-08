@@ -22,7 +22,6 @@ async function handler(req, res) {
       return titles;
     });
 
-    console.log(titles);
     const foundTitle = titles.filter((qText) =>
       qText.toLowerCase().includes(searchTerm.toLowerCase()),
     );

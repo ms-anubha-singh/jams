@@ -1,55 +1,128 @@
-import Head from 'next/head';
 import { useState, useEffect } from 'react';
 import { useCookies } from 'react-cookie';
-import { Box, Text, GridItem } from '@chakra-ui/layout';
 import Layout from '../../components/Layout';
+import NoCookies from '../../components/NoCookies';
+import AdminHeader from '@/components/AdminHeader';
+import { Box, Text, GridItem, HStack } from '@chakra-ui/layout';
+import { Heading } from '@chakra-ui/react';
 
 const Participant = () => {
   const [participantId, setParticipantId] = useState();
   const [cookies, setCookies] = useCookies();
-  const [partyId, setPartyId] = useState('9FUN3xF3hRMJc9r8KoSj');
-  const [titles, setTitles] = useState([]);
-  const [jams, setJams] = useState([]);
-  const [jamId, setJamId] = useState('AdaCMpU5JPYuSs8k9Yl3');
-
-  useEffect(() => {
-    loadParticipantJam();
-  }, []);
-
-  useEffect(() => {
-    loadJams();
-  }, []);
-
-  useEffect(() => {
-    loadJamOnId();
-  }, []);
+  const [partyId, setPartyId] = useState();
+  const [jamId, setJamId] = useState();
+  const [jamContent, setJamContent] = useState(); // Jam data to use. jamContent is currently redundant.
+  const [jamIdWithVotes, setJamIdWithVotes] = useState(); // Data manipulation stage
+  const [displayData, setDisplayData] = useState(); // Final data to display
 
   useEffect(() => {
     const id = cookies['jams-participant'];
     if (id) {
-      console.log(`id: ${id}`);
       setParticipantId(id);
+      setPartyId(id);
     } else {
-      settingIdCookies();
+      settingIdCookies(); //TODO remove this
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cookies]);
 
-  // TODO get jam based on jamId
+  useEffect(() => {
+    if (!partyId) {
+      return;
+    }
+    loadParticipantJam(); // First data manipulation
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partyId]);
+
+  useEffect(() => {
+    if (!jamId) {
+      return;
+    }
+    loadJamOnId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jamId]);
+
+  useEffect(() => {
+    if (!jamIdWithVotes) {
+      return;
+    }
+
+    loadJamContent(jamIdWithVotes);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jamIdWithVotes]);
+
   const loadJamOnId = async () => {
     const response = await fetch(
-      `/api/party-jam?${encodeURIComponent(jamId)}`,
+      `/api/jam-id?jamId=${encodeURIComponent(jamId)}`,
     );
-    const data = (await response).json();
-
-    console.log(data);
+    const data = await response.json();
+    setJamContent(data);
   };
 
   const loadParticipantJam = async () => {
-    const response = await fetch(`/api/party-jam?partyId=${partyId}`);
-    const data = await response.json();
+    let jamIdsVotes = [];
 
-    console.log(data);
+    await fetch(`/api/party-jam?participantId=${partyId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        let uniqueJamIds = [];
+        data.forEach((item) => {
+          if (uniqueJamIds.includes(item.jamId) === false) {
+            uniqueJamIds.push(item.jamId);
+          }
+        });
+
+        uniqueJamIds.forEach((id) => {
+          // this should return a list of votes for an jamId
+          // e.g.[ 1, 1, 1]
+          let allVotes = data.filter((item) => {
+            return item.jamId === id;
+          });
+
+          // take the newly filtered array and total up the votes
+          let voteTemp = [];
+          allVotes.forEach((item) => {
+            voteTemp = [item.vote, ...voteTemp];
+          });
+
+          let votesAdded = voteTemp.reduce((x, y) => {
+            return x + y;
+          });
+
+          // add it to collection of jamIds and votes
+          // jamIdsVotes = [{jamId: 'xyz$', votes: 3}, {jamId: 'abc&', votes: 1}]
+          jamIdsVotes.push({ jamId: id, votes: votesAdded });
+        });
+
+        setJamIdWithVotes(jamIdsVotes);
+      })
+      .catch((error) =>
+        console.error('Error loading participant', error),
+      );
+  };
+
+  const loadJamContent = async (metaVotes) => {
+    let jamMetaContent = [];
+
+    Promise.all(
+      metaVotes.map((item) => {
+        fetch(`/api/jam-id?jamId=${encodeURIComponent(item.jamId)}`)
+          .then((response) => response.json())
+          .then((data) => {
+            jamMetaContent.push({
+              jamId: item.jamId,
+              votes: item.votes,
+              title: data.title,
+              description: data.description,
+            });
+          });
+      }),
+    );
+
+    // This is the part that isn't making sense.
+    setDisplayData(jamMetaContent);
+    // return;
   };
 
   const settingIdCookies = () => {
@@ -65,36 +138,65 @@ const Participant = () => {
       );
   };
 
-  const loadJams = async () => {
-    await fetch('/api/jamming')
-      .then((response) => response.json())
-      .then((jam) => {
-        setJams(jam);
-        jam.map((item) => {
-          setTitles((title) => [...title, item.name]);
-        });
-      });
-  };
+  if (!participantId) return <NoCookies />;
 
   return (
-    <Box>
-      <Head>
-        <title>Participant</title>
-      </Head>
-      <Layout py={14}>
-        <GridItem colSpan={6}>
-          <Text as="h5" fontWeight={600} pb={4}>
-            User ID (Participant ID):
-            {participantId ? participantId : ''}
-          </Text>
-          <Text as="h5" fontWeight={600} pb={4}>
-            {titles.map((title, index) => (
-              <li key={index}>{title}</li>
-            ))}
-          </Text>
-        </GridItem>
-      </Layout>
-    </Box>
+    console.log('Entering the Render...'),
+    console.log('displayData inside the return:'),
+    console.log(displayData),
+    (
+      <>
+        <AdminHeader />
+
+        <Box>
+          <Layout>
+            <GridItem colSpan={{ sm: 1, md: 6 }}>
+              <Heading as="h5" fontSize="lg" mb={1} mt={10}>
+                User ID:
+                {participantId ? participantId : ''}
+              </Heading>
+
+              <Box as={'main'} align={'left'} mt={10}>
+                <Heading as="h3" fontSize="lg" mb={1}>
+                  Jams
+                </Heading>
+              </Box>
+
+              <Text as="h5" fontWeight={600} pb={4} mt={10}>
+                {displayData
+                  ? displayData.map((item, index) => {
+                      return (
+                        <li key={index}>
+                          Title: {item.title} | Votes: {item.votes}
+                        </li>
+                      );
+                    })
+                  : ''}
+              </Text>
+
+              {displayData
+                ? displayData.map((item, index) => {
+                    <JamTitle
+                      key={index}
+                      title={item.title}
+                      votingTotal={item.votes}
+                    />;
+                  })
+                : ''}
+            </GridItem>
+          </Layout>
+        </Box>
+      </>
+    )
+  );
+};
+
+const JamTitle = ({ title, votingTotal }) => {
+  return (
+    <HStack borderRadius="lg" borderWidth="1px" p={4} spacing={600}>
+      <Box>Jam: {title}</Box>
+      <Box>{votingTotal} votes</Box>
+    </HStack>
   );
 };
 

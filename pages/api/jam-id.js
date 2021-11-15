@@ -3,7 +3,7 @@ import ensureAdmin from 'utils/admin-auth-middleware.js';
 
 export default async function handler(req, res) {
   const {
-    query: { participantId },
+    query: { jamId },
     method,
   } = req;
 
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!participantId) {
+  if (!jamId) {
     res.status(404).end();
     return;
   }
@@ -27,26 +27,23 @@ export default async function handler(req, res) {
         .status(500)
         .json({ error: 'Sorry, permission denied' });
     }
-
     const db = fire.firestore();
 
-    const votesRef = await db
-      .collection('participants')
-      .doc(participantId)
-      .collection('votes');
+    const jamsRef = await db
+      .collection('jams')
+      .doc(jamId)
+      .get()
+      .then((query) => {
+        let jam = {};
 
-    const allVotes = await votesRef.get().then((query) => {
-      let votes = [];
+        const queryData = query.data();
+        jam.title = queryData.name;
+        jam.description = queryData.description;
 
-      query.forEach((document) => {
-        const getVotes = document.data();
-        votes.push(getVotes);
+        return jam;
       });
 
-      return votes;
-    });
-
-    res.status(200).json(allVotes);
+    res.status(200).json(jamsRef);
   } catch {
     return res
       .status(500)

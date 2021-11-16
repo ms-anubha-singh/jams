@@ -43,13 +43,15 @@ export default async function handler(req, res) {
         votes.push(getVotes);
       });
 
+      console.log(votes);
       return votes;
     });
 
     res.status(200).json(allVotes);
   } catch {
-    return res
-      .status(500)
-      .json({ error: 'Sorry, something went wrong' });
+    return res.status(500).json({
+      error:
+        'Sorry, something went wrong. Check if you have exceed you daily usage.',
+    });
   }
 }

@@ -16,6 +16,7 @@ const Participant = () => {
   const [displayData, setDisplayData] = useState(); // Final data to display
 
   useEffect(() => {
+    console.log('1');
     const id = cookies['jams-participant'];
     if (id) {
       setParticipantId(id);
@@ -27,30 +28,23 @@ const Participant = () => {
   }, [cookies]);
 
   useEffect(() => {
+    console.log('2');
     if (!partyId) {
       return;
     }
     loadParticipantJam(); // First data manipulation
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [partyId]);
 
   useEffect(() => {
+    console.log('3');
     if (!jamId) {
       return;
     }
     loadJamOnId();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jamId]);
-
-  useEffect(() => {
-    if (!jamIdWithVotes) {
-      return;
-    }
-
-    loadJamContent(jamIdWithVotes);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jamIdWithVotes]);
 
   const loadJamOnId = async () => {
     const response = await fetch(
@@ -61,6 +55,7 @@ const Participant = () => {
   };
 
   const loadParticipantJam = async () => {
+    console.log('Entering loadParticipantJam()');
     let jamIdsVotes = [];
 
     await fetch(`/api/party-jam?participantId=${partyId}`)
@@ -94,8 +89,14 @@ const Participant = () => {
           // jamIdsVotes = [{jamId: 'xyz$', votes: 3}, {jamId: 'abc&', votes: 1}]
           jamIdsVotes.push({ jamId: id, votes: votesAdded });
         });
-
+      })
+      .then(() => {
+        console.log('jamIdWithVotes:');
+        console.log(jamIdsVotes);
         setJamIdWithVotes(jamIdsVotes);
+      })
+      .then(() => {
+        loadJamContent(jamIdsVotes);
       })
       .catch((error) =>
         console.error('Error loading participant', error),
@@ -116,13 +117,26 @@ const Participant = () => {
               title: data.title,
               description: data.description,
             });
+            // console.log(
+            //   `jamId: ${item.jamId} | votes: ${item.votes} | title ${data.title} | description: ${data.description}`,
+            // );
           });
       }),
-    );
+    )
+      .then(() => {
+        console.log('Inside of THEN of loadJamContent()');
+        setDisplayData(jamMetaContent); // Comment out to show data?? why??
+        console.log('jamMetaContent:');
+        console.log(jamMetaContent);
+      })
+      .catch((error) => console.log(error.message));
+
+    // after this Promise.all resolves
+    // .then( () => { ..callback function ..})
 
     // This is the part that isn't making sense.
-    setDisplayData(jamMetaContent);
-    // return;
+    // setDisplayData(jamMetaContent);
+    return;
   };
 
   const settingIdCookies = () => {
@@ -142,7 +156,7 @@ const Participant = () => {
 
   return (
     console.log('Entering the Render...'),
-    console.log('displayData inside the return:'),
+    console.log('displayData inside the Render:'),
     console.log(displayData),
     (
       <>
@@ -174,7 +188,7 @@ const Participant = () => {
                   : ''}
               </Text>
 
-              {displayData
+              {/* {displayData
                 ? displayData.map((item, index) => {
                     <JamTitle
                       key={index}
@@ -182,7 +196,7 @@ const Participant = () => {
                       votingTotal={item.votes}
                     />;
                   })
-                : ''}
+                : ''} */}
             </GridItem>
           </Layout>
         </Box>
